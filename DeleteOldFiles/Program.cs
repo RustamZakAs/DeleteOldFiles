@@ -28,24 +28,42 @@ namespace DeleteOldFiles
                 || String.IsNullOrEmpty(iniInfo["extension"].ToString())
                 || String.IsNullOrEmpty(iniInfo["goodfiles"].ToString()))
             {
-                iniInfo["directory"] = @"\\192.168.10.100\d$\SQL Backup";
+                //iniInfo["directory"] = @"\\192.168.10.100\d$\SQL Backup";
+                //iniInfo["extension"] = "bak";
+                //iniInfo["goodfiles"] = "3";
+
+                iniInfo["directory"] = @"\\127.0.0.1\d$\Folder";
                 iniInfo["extension"] = "bak";
                 iniInfo["goodfiles"] = "3";
 
                 ini.Write("Info", iniInfo);
+
+                File.WriteAllText("ReadMe.txt", "\"DeleteOldFiles.ini\" param fayl is not written!");
                 return;
             }
+            else if (iniInfo["directory"].ToString() == @"\\127.0.0.1\d$\Folder"
+                  && iniInfo["extension"].ToString() == "bak"
+                  && iniInfo["goodfiles"].ToString() == "3")
+                  {
+                      File.WriteAllText("ReadMe.txt", "\"DeleteOldFiles.ini\" param fayl is not written!");
+                      return;
+                  }
+            else
+            {
+                if (File.Exists("ReadMe.txt"))
+                {
+                    File.Delete("ReadMe.txt");
+                }
+            }
 
-            //bool showConsole = false;
             bool moreFiles = true;
 
-            short goodfiles;
-            short.TryParse(iniInfo["goodfiles"].ToString(), out goodfiles);
+            short.TryParse(iniInfo["goodfiles"].Trim().ToString(), out short goodfiles);
             goodfiles = goodfiles <= 1 ? (short)1 : goodfiles;
 
             string directory = iniInfo["directory"].ToString();
 
-            string extension = iniInfo["extension"].ToString();
+            string extension = iniInfo["extension"].Trim().ToString();
 
             List<FileInfo> FileInfoList = new List<FileInfo>();
             //List<FileInfo> DeletingFilesInfoList = new List<FileInfo>();
@@ -111,7 +129,7 @@ namespace DeleteOldFiles
     public class IniFile
     {
         public string path { get; set; }
-        string EXE = Assembly.GetExecutingAssembly().GetName().Name;
+        readonly string EXE = Assembly.GetExecutingAssembly().GetName().Name;
 
         [DllImport("kernel32", CharSet = CharSet.Ansi)]
         static extern int GetPrivateProfileString(string Section, string Key, string Default, StringBuilder RetVal, int Size, string FilePath);
@@ -182,10 +200,12 @@ namespace DeleteOldFiles
         public Dictionary<string, string> Read(string section)
         {
             IniFile ini = new IniFile(path);
-            Dictionary<string, string> formValue = new Dictionary<string, string>();
-            formValue.Add("directory", ini.IniReadValue("Info", "directory"));
-            formValue.Add("extension", ini.IniReadValue("Info", "extension"));
-            formValue.Add("goodfiles", ini.IniReadValue("Info", "goodfiles"));
+            Dictionary<string, string> formValue = new Dictionary<string, string>
+            {
+                { "directory", ini.IniReadValue("Info", "directory") },
+                { "extension", ini.IniReadValue("Info", "extension") },
+                { "goodfiles", ini.IniReadValue("Info", "goodfiles") }
+            };
             return formValue;
         }
 
