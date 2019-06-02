@@ -59,19 +59,25 @@ namespace DeleteOldFiles
             bool moreFiles = true;
 
             short.TryParse(iniInfo["goodfiles"].Trim().ToString(), out short goodfiles);
-            goodfiles = goodfiles <= 1 ? (short)1 : goodfiles;
+            goodfiles = goodfiles < 0 ? (short)(-goodfiles) : goodfiles;
 
             string directory = iniInfo["directory"].ToString();
 
-            string extension = iniInfo["extension"].Trim().ToString();
+            //string extension = iniInfo["extension"].Trim().ToString();
+            string[] extensions = iniInfo["extension"].Replace('*', ' ').Replace('.', ' ').Trim().Split(' ');
 
             List<FileInfo> FileInfoList = new List<FileInfo>();
             //List<FileInfo> DeletingFilesInfoList = new List<FileInfo>();
 
             DirectoryInfo d = new DirectoryInfo(directory);
-            FileInfo[] Files = d.GetFiles("*." + extension);
+            //FileInfo[] Files = d.GetFiles("*." + extension).Count();
+            //List<FileInfo> FilesList = new List<FileInfo>();
+            foreach (var extension in extensions)
+            {
+                FileInfoList.AddRange(d.GetFiles("*." + extension));
+            }
 
-            FileInfoList.AddRange(Files);
+            //FileInfoList.AddRange(Files);
             //if (showConsole) Console.WriteLine("Selected files:");
             //foreach (FileInfo file in Files)
             //{
